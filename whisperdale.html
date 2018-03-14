@@ -184,5 +184,111 @@
     </div>
   </div>
 </div><br><br>
+
+<script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCSvoDVauh8Cb4lfu8_V0h8LVCNe3Wow8Q",
+    authDomain: "bm-mn-a614d.firebaseapp.com",
+    databaseURL: "https://bm-mn-a614d.firebaseio.com",
+    projectId: "bm-mn-a614d",
+    storageBucket: "bm-mn-a614d.appspot.com",
+    messagingSenderId: "209475158993"
+  };
+  firebase.initializeApp(config);
+  
+  function login() {
+   function newLoginHappened(user) {
+     if (user) {            //if the user that was typed in exists:
+       app(user)            //then app runs with user info in it
+     } else {               //else get the user to log-in using their google acct
+       var provider = new firebase.auth.GoogleAuthProvider();
+       firebase.auth().signInWithRedirect(provider)
+     }
+   }
+   firebase.auth().onAuthStateChanged(newLoginHappened)   //run newLoginHappened function anytime new authorization
+  }
+  
+  function app(user) {
+    document.getElementById("clientName").innerHTML = user.displayName;
+    
+    function updateMyStatus(e) {
+      var myUpdate = {}   //this object is about to be populated
+      myUpdate.email = user.email
+      myUpdate.displayName = user.displayName
+      var statusChild = parent.child("status")
+      var captionChild = parent.child("caption")
+      var newStatuses = []
+      statusChild.on("value", function(snap) {
+          if (snap.val() != null) 
+            newStatuses = snap.val()
+          else
+            newStatuses = []
+      });
+      var newCaptions = []
+      captionChild.on("value", function(snap) {
+          if (snap.val() != null) 
+            newCaptions = snap.val()
+          else
+            newCaptions = []
+      });
+      var newStatus = document.getElementById("clientStatus").value;
+      if (newStatus != "")
+        newStatuses.push(newStatus)
+      else
+        newStatuses.push("https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg")
+      var newCaption = document.getElementById("imageCaption").value;
+      if (newCaption != "")
+        newCaptions.push(newCaption)
+      else
+        newCaptions.push("No caption")
+      myUpdate.status = newStatuses                      //update about to be sent has an array as its status
+      myUpdate.caption = newCaptions
+      fb.child(user.uid).set(myUpdate);
+    }
+    
+    function receiveUpdate(received) {
+       var data = {}
+       if (received.val() != null)
+         data = received.val()
+       else
+         data = {}
+       //document.getElementById("one").src = "";
+       var person = data
+       document.getElementById("one").src = person.status[0]
+       document.getElementById("two").src = person.status[1]
+       document.getElementById("three").src = person.status[2]
+       document.getElementById("four").src = person.status[3]
+       document.getElementById("five").src = person.status[4]
+       document.getElementById("six").src = person.status[5]
+       document.getElementById("seven").src = person.status[6]
+       document.getElementById("eight").src = person.status[7]
+             
+       document.getElementById("textOne").innerHTML = person.caption[0]
+       document.getElementById("textTwo").innerHTML = person.caption[1]
+       document.getElementById("textThree").innerHTML = person.caption[2]
+       document.getElementById("textFour").innerHTML = person.caption[3]
+       document.getElementById("textFive").innerHTML = person.caption[4]
+       document.getElementById("textSix").innerHTML = person.caption[5]
+       document.getElementById("textSeven").innerHTML = person.caption[6]
+       document.getElementById("textEight").innerHTML = person.caption[7]
+    }
+    
+    var fb = firebase.database().ref('whatsmystatus');
+    document.getElementById("clientSubmit").addEventListener("click", updateMyStatus)   //runs the updateMyStatus function on event
+    var parent = fb.child(user.uid)
+    parent.on("value", receiveUpdate);
+  }
+  
+  window.onload = login;
+</script>
+
+<script>
+  var revokeAllScopes = function() {
+    auth2.disconnect();
+  }
+</script>
+	
 </body>
 </html>
